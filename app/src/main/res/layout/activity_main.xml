@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="30dp"
+    android:background="#121212">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="VisionX"
+        android:textColor="#FFFFFF"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="10dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Detection Mode"
+        android:textColor="#AAAAAA"
+        android:textSize="16sp"
+        android:layout_marginBottom="50dp"/>
+
+    <Button
+        android:id="@+id/btnLive"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:text="Live Camera"
+        android:textSize="20sp"
+        android:backgroundTint="#4CAF50"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/btnImage"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:text="Pick Image"
+        android:textSize="20sp"
+        android:backgroundTint="#2196F3"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/btnVideo"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:text="Pick Video"
+        android:textSize="20sp"
+        android:backgroundTint="#FF9800"/>
+
+</LinearLayout>

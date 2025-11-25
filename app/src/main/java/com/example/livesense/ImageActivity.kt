@@ -22,18 +22,16 @@ class ImageActivity : ComponentActivity() {
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
-            // suppress deprecation warning for project simplicity
             @Suppress("DEPRECATION")
             val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
             processImage(bitmap)
         }
     }
 
-    private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-        bitmap?.let {
-            processImage(it)
+    private val takePicture =
+        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+            bitmap?.let { processImage(it) }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,34 +40,23 @@ class ImageActivity : ComponentActivity() {
 
         yolo = YoloDetector(this)
 
-        binding.uploadButton.setOnClickListener {
-            pickImage.launch("image/*")
-        }
+        binding.uploadButton.setOnClickListener { pickImage.launch("image/*") }
 
         binding.snapButton.setOnClickListener {
             if (allPermissionsGranted()) {
                 takePicture.launch(null)
             } else {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.CAMERA),
-                    102
-                )
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 102)
             }
         }
 
-        // Wait for layout to build before getting height for animation
-        binding.root.post {
-            startScannerAnimation()
-        }
+        binding.root.post { startScannerAnimation() }
     }
 
     private fun startScannerAnimation() {
         binding.scannerLine.visibility = View.VISIBLE
-        // Ensure height is not 0 to avoid animation issues
-        val height = binding.placeholderAnimation.height.toFloat()
-        if (height > 0) {
-            val animator = ObjectAnimator.ofFloat(binding.scannerLine, "translationY", 0f, height)
+        if (binding.placeholderAnimation.height > 0) {
+            val animator = ObjectAnimator.ofFloat(binding.scannerLine, "translationY", 0f, binding.placeholderAnimation.height.toFloat())
             animator.duration = 2000
             animator.repeatCount = ObjectAnimator.INFINITE
             animator.repeatMode = ObjectAnimator.REVERSE
@@ -83,26 +70,16 @@ class ImageActivity : ComponentActivity() {
         binding.imageView.setImageBitmap(bitmap)
 
         yolo.confidenceThreshold = 0.6f
-
-        // 1. Detect
         val (boxes, _) = yolo.detect(bitmap)
 
-        // 2. FIX: Send bitmap dimensions to Overlay so it can scale boxes correctly
-        binding.boxOverlay.setBoxes(boxes, bitmap.width, bitmap.height)
+        // FIX: Pass fitCenter = true to enable "Fit Mode" (prevents box misalignment)
+        binding.boxOverlay.setBoxes(boxes, bitmap.width, bitmap.height, fitCenter = true)
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 102) {
-            if (allPermissionsGranted()) {
-                takePicture.launch(null)
-            } else {
-                Toast.makeText(this, "Camera permission is required to take a picture.", Toast.LENGTH_SHORT).show()
-            }
+        if (requestCode == 102 && !allPermissionsGranted()) {
+            Toast.makeText(this, "Camera permission required", Toast.LENGTH_SHORT).show()
         }
     }
 

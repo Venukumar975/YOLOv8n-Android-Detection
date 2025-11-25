@@ -23,18 +23,20 @@
             android:id="@+id/imageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop" />
+            android:scaleType="fitCenter" />
 
         <FrameLayout
             android:id="@+id/placeholder_animation"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <!-- CHANGED TO BUILT-IN ICON TO PREVENT CRASH -->
             <ImageView
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_gravity="center"
-                android:src="@drawable/placeholder_image_icon" />
+                android:src="@android:drawable/ic_menu_gallery"
+                app:tint="#80FFFFFF" />
 
             <View
                 android:id="@+id/scanner_line"
@@ -63,7 +65,7 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <Button
-            android:id="@+id/upload_button"
+            android:id="@+id/uploadButton"
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_weight="1"
@@ -73,7 +75,7 @@
             android:textColor="@android:color/white"/>
 
         <Button
-            android:id="@+id/snap_button"
+            android:id="@+id/snapButton"
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_weight="1"

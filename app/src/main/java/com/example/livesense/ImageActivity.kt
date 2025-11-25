@@ -2,7 +2,6 @@ package com.example.livesense
 
 import android.Manifest
 import android.animation.ObjectAnimator
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -22,14 +21,16 @@ class ImageActivity : ComponentActivity() {
     private lateinit var yolo: YoloDetector
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { 
+        uri?.let {
+            // suppress deprecation warning for project simplicity
+            @Suppress("DEPRECATION")
             val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
             processImage(bitmap)
         }
     }
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-        bitmap?.let { 
+        bitmap?.let {
             processImage(it)
         }
     }
@@ -57,25 +58,37 @@ class ImageActivity : ComponentActivity() {
             }
         }
 
-        startScannerAnimation()
+        // Wait for layout to build before getting height for animation
+        binding.root.post {
+            startScannerAnimation()
+        }
     }
 
     private fun startScannerAnimation() {
         binding.scannerLine.visibility = View.VISIBLE
-        val animator = ObjectAnimator.ofFloat(binding.scannerLine, "translationY", 0f, binding.placeholderAnimation.height.toFloat())
-        animator.duration = 2000
-        animator.repeatCount = ObjectAnimator.INFINITE
-        animator.repeatMode = ObjectAnimator.REVERSE
-        animator.interpolator = AccelerateDecelerateInterpolator()
-        animator.start()
+        // Ensure height is not 0 to avoid animation issues
+        val height = binding.placeholderAnimation.height.toFloat()
+        if (height > 0) {
+            val animator = ObjectAnimator.ofFloat(binding.scannerLine, "translationY", 0f, height)
+            animator.duration = 2000
+            animator.repeatCount = ObjectAnimator.INFINITE
+            animator.repeatMode = ObjectAnimator.REVERSE
+            animator.interpolator = AccelerateDecelerateInterpolator()
+            animator.start()
+        }
     }
 
     private fun processImage(bitmap: Bitmap) {
         binding.placeholderAnimation.visibility = View.GONE
         binding.imageView.setImageBitmap(bitmap)
+
         yolo.confidenceThreshold = 0.6f
+
+        // 1. Detect
         val (boxes, _) = yolo.detect(bitmap)
-        binding.boxOverlay.setBoxes(boxes)
+
+        // 2. FIX: Send bitmap dimensions to Overlay so it can scale boxes correctly
+        binding.boxOverlay.setBoxes(boxes, bitmap.width, bitmap.height)
     }
 
     override fun onRequestPermissionsResult(

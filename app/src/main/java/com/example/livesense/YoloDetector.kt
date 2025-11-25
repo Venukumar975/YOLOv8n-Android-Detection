@@ -2,6 +2,10 @@ package com.example.livesense
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Matrix
+import android.graphics.Paint
 import android.graphics.RectF
 import android.util.Log
 import org.tensorflow.lite.DataType
@@ -11,7 +15,6 @@ import org.tensorflow.lite.support.common.ops.CastOp
 import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
-import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import kotlin.math.max
 import kotlin.math.min
@@ -20,7 +23,7 @@ class YoloDetector(context: Context) {
 
     private var interpreter: Interpreter? = null
     private val INPUT_SIZE = 640
-    var confidenceThreshold: Float = 0.3f // Default threshold
+    var confidenceThreshold: Float = 0.5f
     private val NMS_THRESHOLD = 0.5f
 
     private var inputImageBuffer = TensorImage(DataType.FLOAT32)
@@ -46,29 +49,57 @@ class YoloDetector(context: Context) {
         val classIdx: Int
     )
 
-    fun detect(bitmap: Bitmap): Pair<List<BoxOverlay.Box>, Float> {
+    fun detect(sourceBitmap: Bitmap): Pair<List<BoxOverlay.Box>, Float> {
         if (interpreter == null) return Pair(emptyList(), 0f)
 
+        // 1. LETTERBOXING: Scale image to fit 640x640 maintaining aspect ratio
+        val matrix = Matrix()
+        val scaleFactor = min(INPUT_SIZE.toFloat() / sourceBitmap.width, INPUT_SIZE.toFloat() / sourceBitmap.height)
+        matrix.postScale(scaleFactor, scaleFactor)
+
+        // Calculate padding to center the image
+        val scaledWidth = sourceBitmap.width * scaleFactor
+        val scaledHeight = sourceBitmap.height * scaleFactor
+        val padX = (INPUT_SIZE - scaledWidth) / 2f
+        val padY = (INPUT_SIZE - scaledHeight) / 2f
+
+        matrix.postTranslate(padX, padY)
+
+        val inputBitmap = Bitmap.createBitmap(INPUT_SIZE, INPUT_SIZE, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(inputBitmap)
+        canvas.drawColor(Color.BLACK)
+        canvas.drawBitmap(sourceBitmap, matrix, Paint())
+
+        // 2. PROCESS IMAGE
         val processor = ImageProcessor.Builder()
-            .add(ResizeOp(INPUT_SIZE, INPUT_SIZE, ResizeOp.ResizeMethod.BILINEAR))
             .add(NormalizeOp(0f, 255f))
             .add(CastOp(DataType.FLOAT32))
             .build()
 
-        inputImageBuffer.load(bitmap)
+        inputImageBuffer.load(inputBitmap)
         val processedImage = processor.process(inputImageBuffer)
 
+        // 3. RUN INFERENCE
         interpreter!!.run(processedImage.buffer, outputBuffer!!.buffer.rewind())
 
         val outArr = outputBuffer!!.floatArray
         val outShape = interpreter!!.getOutputTensor(0).shape()
 
+        // 4. PROCESS OUTPUT
         val detections = processYoloOutput(outArr, outShape)
-
         val nmsDetections = nonMaxSuppression(detections, NMS_THRESHOLD)
 
-        val boxes = nmsDetections.map {
-            BoxOverlay.Box(it.rect, Constants.LABELS.getOrElse(it.classIdx) { "Unknown" })
+        // 5. REVERSE LETTERBOX: Map boxes back to Original Source Image space
+        val boxes = nmsDetections.map { det ->
+            // (x - padding) / scale
+            val left = (det.rect.left - padX) / scaleFactor
+            val top = (det.rect.top - padY) / scaleFactor
+            val right = (det.rect.right - padX) / scaleFactor
+            val bottom = (det.rect.bottom - padY) / scaleFactor
+
+            val scaledRect = RectF(left, top, right, bottom)
+
+            BoxOverlay.Box(scaledRect, Constants.LABELS.getOrElse(det.classIdx) { "Unknown" })
         }
 
         val bestScore = nmsDetections.maxOfOrNull { it.score } ?: 0f
@@ -77,15 +108,18 @@ class YoloDetector(context: Context) {
 
     private fun processYoloOutput(output: FloatArray, shape: IntArray): List<Detection> {
         val detections = mutableListOf<Detection>()
+
         val numBoxes: Int
         val numFeatures: Int
         val isTransposed: Boolean
 
         if (shape[1] > shape[2]) {
+            // [1, 8400, 84]
             numBoxes = shape[1]
             numFeatures = shape[2]
             isTransposed = false
         } else {
+            // [1, 84, 8400]
             numBoxes = shape[2]
             numFeatures = shape[1]
             isTransposed = true
@@ -110,10 +144,10 @@ class YoloDetector(context: Context) {
             }
 
             if (maxScore > confidenceThreshold) {
-                val cx: Float
-                val cy: Float
-                val w: Float
-                val h: Float
+                var cx: Float
+                var cy: Float
+                var w: Float
+                var h: Float
 
                 if (isTransposed) {
                     cx = output[0 * numBoxes + i]
@@ -126,6 +160,15 @@ class YoloDetector(context: Context) {
                     cy = output[base + 1]
                     w = output[base + 2]
                     h = output[base + 3]
+                }
+
+                // --- CRITICAL FIX: CHECK FOR NORMALIZED COORDINATES ---
+                // If coordinates are small (0.0 to 1.0), multiply by 640 to get pixels
+                if (w <= 1.0f && h <= 1.0f && cx <= 1.0f && cy <= 1.0f) {
+                    cx *= INPUT_SIZE
+                    cy *= INPUT_SIZE
+                    w *= INPUT_SIZE
+                    h *= INPUT_SIZE
                 }
 
                 val x1 = cx - w / 2f

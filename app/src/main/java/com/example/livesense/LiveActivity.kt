@@ -60,12 +60,19 @@ class LiveActivity : ComponentActivity() {
                 try {
                     val bitmap = imageProxy.toBitmap()
                     if (bitmap != null) {
+                        // Pass the bitmap to detection (Letterboxing happens inside)
                         val (boxes, _) = yolo.detect(bitmap)
                         val inferenceTime = System.currentTimeMillis() - startTime
+
+                        // Get bitmap dimensions before closing
+                        val w = bitmap.width
+                        val h = bitmap.height
+
                         runOnUiThread {
                             binding.objectCounter.text = "Objects: ${boxes.size}"
                             binding.inferenceTime.text = "Time: ${inferenceTime}ms"
-                            binding.boxOverlay.setBoxes(boxes)
+                            // Pass dimensions to overlay for correct scaling
+                            binding.boxOverlay.setBoxes(boxes, w, h)
                         }
                     }
                 } catch (e: Exception) {

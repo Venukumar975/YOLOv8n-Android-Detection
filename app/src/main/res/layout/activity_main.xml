@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="VisionX"
+        android:text="@string/app_title"
         android:textColor="#FFFFFF"
         android:textSize="40sp"
         android:textStyle="bold"
@@ -19,7 +19,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select Detection Mode"
+        android:text="@string/select_mode"
         android:textColor="#AAAAAA"
         android:textSize="16sp"
         android:layout_marginBottom="50dp"/>
@@ -28,7 +28,7 @@
         android:id="@+id/btnLive"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:text="Live Camera"
+        android:text="@string/btn_live"
         android:textSize="20sp"
         android:backgroundTint="#4CAF50"
         android:layout_marginBottom="20dp"/>
@@ -37,7 +37,7 @@
         android:id="@+id/btnImage"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:text="Pick Image"
+        android:text="@string/btn_image"
         android:textSize="20sp"
         android:backgroundTint="#2196F3"
         android:layout_marginBottom="20dp"/>
@@ -46,7 +46,7 @@
         android:id="@+id/btnVideo"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:text="Pick Video"
+        android:text="@string/btn_video"
         android:textSize="20sp"
         android:backgroundTint="#FF9800"/>
 

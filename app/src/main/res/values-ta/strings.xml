@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LiveSense</string>
+    <string name="app_title">விஷன்-எக்ஸ்</string>
+    <string name="select_mode">பயன்முறையைத் தேர்ந்தெடுக்கவும்</string>
+
+    <string name="btn_live">நேரடி கேமரா</string>
+    <string name="btn_image">படம் எடு</string>
+    <string name="btn_video">வீடியோ எடு</string>
+    <string name="btn_upload">பதிவேற்று</string>
+    <string name="btn_snap">கிளிக் செய்</string>
+
+    <string name="perm_required">கேமரா அனுமதி தேவை</string>
+    <string name="choose_lang">மொழியைத் தேர்ந்தெடுங்கள்</string>
+
+    <string-array name="yolo_labels">
+        <item>விமானம்</item>        <item>மிதிவண்டி</item>      <item>பறவை</item>          <item>படகு</item>           <item>பாட்டில்</item>       <item>பேருந்து</item>       <item>மகிழுந்து</item>      <item>பூனை</item>           <item>நாற்காலி</item>       <item>பசு</item>            <item>உணவு மேசை</item>      <item>நாய்</item>           <item>குதிரை</item>         <item>மோட்டார் சைக்கிள்</item><item>நபர்</item>           <item>பூந்தொட்டி</item>      <item>செம்மறி ஆடு</item>    <item>சோபா</item>           <item>ரயில்</item>          <item>தொலைக்காட்சி</item>
+    </string-array>
+</resources>

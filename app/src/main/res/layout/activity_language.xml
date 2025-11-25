@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="20dp"
+    android:background="#121212">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/choose_lang"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="40dp"/>
+
+    <Button android:id="@+id/btnEn" android:layout_width="match_parent" android:layout_height="60dp" android:text="English" android:layout_marginBottom="10dp"/>
+    <Button android:id="@+id/btnHi" android:layout_width="match_parent" android:layout_height="60dp" android:text="हिंदी (Hindi)" android:layout_marginBottom="10dp"/>
+    <Button android:id="@+id/btnTa" android:layout_width="match_parent" android:layout_height="60dp" android:text="தமிழ் (Tamil)" android:layout_marginBottom="10dp"/>
+    <Button android:id="@+id/btnTe" android:layout_width="match_parent" android:layout_height="60dp" android:text="తెలుగు (Telugu)" android:layout_marginBottom="10dp"/>
+    <Button android:id="@+id/btnMr" android:layout_width="match_parent" android:layout_height="60dp" android:text="मराठी (Marathi)" android:layout_marginBottom="10dp"/>
+    <Button android:id="@+id/btnBn" android:layout_width="match_parent" android:layout_height="60dp" android:text="বাংলা (Bengali)"/>
+
+</LinearLayout>

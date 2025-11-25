@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LiveSense</string>
+    <string name="app_title">విజన్-ఎక్స్</string>
+    <string name="select_mode">డిటెక్షన్ మోడ్ ఎంచుకోండి</string>
+
+    <string name="btn_live">లైవ్ కెమెరా</string>
+    <string name="btn_image">చిత్రాన్ని ఎంచుకోండి</string>
+    <string name="btn_video">వీడియోను ఎంచుకోండి</string>
+    <string name="btn_upload">అప్‌లోడ్</string>
+    <string name="btn_snap">ఫోటో తీయి</string>
+
+    <string name="perm_required">కెమెరా అనుమతి అవసరం</string>
+    <string name="choose_lang">భాషను ఎంచుకోండి</string>
+
+    <string-array name="yolo_labels">
+        <item>విమానం</item>         <item>సైకిల్</item>         <item>పక్షి</item>           <item>పడవ</item>            <item>సీసా</item>           <item>బస్సు</item>           <item>కారు</item>            <item>పిల్లి</item>           <item>కుర్చీ</item>           <item>ఆవు</item>            <item>డైనింగ్ టేబుల్</item>  <item>కుక్క</item>           <item>గుర్రం</item>          <item>మోటార్ సైకిల్</item>   <item>వ్యక్తి</item>          <item>పూల కుండీ</item>       <item>గొర్రె</item>           <item>సోఫా</item>           <item>రైలు</item>            <item>టీవీ</item>
+    </string-array>
+</resources>

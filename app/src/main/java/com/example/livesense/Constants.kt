@@ -1,27 +1,15 @@
 package com.example.livesense
 
+import android.content.Context
+
 object Constants {
-    // These match the 20 classes in your VOC Training Screenshot exactly
-    val LABELS = listOf(
-        "विमान",        // 0: aeroplane
-        "साइकिल",       // 1: bicycle
-        "पक्षी",         // 2: bird
-        "नाव",          // 3: boat
-        "बोतल",         // 4: bottle
-        "बस",           // 5: bus
-        "कार",          // 6: car
-        "बिल्ली",        // 7: cat
-        "कुर्सी",         // 8: chair
-        "गाय",          // 9: cow
-        "मेज",          // 10: diningtable
-        "कुत्ता",         // 11: dog
-        "घोड़ा",         // 12: horse
-        "मोटरसाइकिल",    // 13: motorbike
-        "व्यक्ति",        // 14: person
-        "गमला",         // 15: pottedplant
-        "भेड़",          // 16: sheep
-        "सोफा",         // 17: sofa
-        "ट्रेन",          // 18: train
-        "टीवी"          // 19: tvmonitor
-    )
+    // 1. Initialize an empty list (It will be filled when the app starts)
+    var LABELS = emptyList<String>()
+
+    // 2. Function to load the correct language labels
+    fun updateLabels(context: Context) {
+        val resources = context.resources
+        // This reads the <string-array name="yolo_labels"> from the active language file
+        LABELS = resources.getStringArray(R.array.yolo_labels).toList()
+    }
 }

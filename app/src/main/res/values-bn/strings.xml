@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LiveSense</string>
+    <string name="app_title">ভিশন-এক্স</string>
+    <string name="select_mode">শনাক্তকরণ মোড নির্বাচন করুন</string>
+
+    <string name="btn_live">লাইভ ক্যামেরা</string>
+    <string name="btn_image">ছবি বাছুন</string>
+    <string name="btn_video">ভিডিও বাছুন</string>
+    <string name="btn_upload">আপলোড</string>
+    <string name="btn_snap">ছবি তুলুন</string>
+
+    <string name="perm_required">ক্যামেরা অনুমতি প্রয়োজন</string>
+    <string name="choose_lang">ভাষা নির্বাচন করুন</string>
+
+    <string-array name="yolo_labels">
+        <item>বিমান</item>          <item>সাইকেল</item>         <item>পাখি</item>           <item>নৌকা</item>           <item>বোতল</item>           <item>বাস</item>            <item>গাড়ি</item>           <item>বিড়াল</item>          <item>চেয়ার</item>          <item>গরু</item>            <item>খাবার টেবিল</item>     <item>কুকুর</item>           <item>ঘোড়া</item>           <item>মোটরবাইক</item>       <item>মানুষ</item>           <item>টবের গাছ</item>        <item>ভেড়া</item>           <item>সোফা</item>           <item>ট্রেন</item>           <item>টিভি</item>
+    </string-array>
+</resources>

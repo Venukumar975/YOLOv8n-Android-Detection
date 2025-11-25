@@ -70,7 +70,7 @@
             android:layout_height="60dp"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            android:text="Upload"
+            android:text="@string/btn_upload"
             android:backgroundTint="#2196F3"
             android:textColor="@android:color/white"/>
 
@@ -80,7 +80,7 @@
             android:layout_height="60dp"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="Snap"
+            android:text="@string/btn_snap"
             android:backgroundTint="#4CAF50"
             android:textColor="@android:color/white"/>
     </LinearLayout>

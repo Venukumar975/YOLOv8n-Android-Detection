@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LiveSense</string>
+    <string name="app_title">व्हिजन-एक्स</string>
+    <string name="select_mode">डिटेक्शन मोड निवडा</string>
+
+    <string name="btn_live">लाईव्ह कॅमेरा</string>
+    <string name="btn_image">फोटो निवडा</string>
+    <string name="btn_video">व्हिडिओ निवडा</string>
+    <string name="btn_upload">अपलोड करा</string>
+    <string name="btn_snap">फोटो काढा</string>
+
+    <string name="perm_required">कॅमेरा परवानगी आवश्यक आहे</string>
+    <string name="choose_lang">भाषा निवडा</string>
+
+    <string-array name="yolo_labels">
+        <item>विमान</item>          <item>सायकल</item>         <item>पक्षी</item>           <item>नाव</item>            <item>बाटली</item>          <item>बस</item>             <item>कार</item>            <item>मांजर</item>          <item>खुर्ची</item>           <item>गाय</item>            <item>जेवणाचे टेबल</item>    <item>कुत्रा</item>           <item>घोडा</item>           <item>मोटारसायकल</item>     <item>व्यक्ती</item>          <item>कुंडी</item>           <item>मेंढी</item>           <item>सोफा</item>           <item>रेल्वे</item>           <item>टीव्ही</item>
+    </string-array>
+</resources>

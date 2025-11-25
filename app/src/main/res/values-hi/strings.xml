@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LiveSense</string>
+    <string name="app_title">विज़न-एक्स</string>
+    <string name="select_mode">डिटेक्शन मोड चुनें</string>
+
+    <string name="btn_live">लाइव कैमरा</string>
+    <string name="btn_image">तस्वीर चुनें</string>
+    <string name="btn_video">वीडियो चुनें</string>
+    <string name="btn_upload">अपलोड</string>
+    <string name="btn_snap">फोटो लें</string>
+
+    <string name="perm_required">कैमरा अनुमति आवश्यक है</string>
+    <string name="choose_lang">भाषा चुनें</string>
+
+    <string-array name="yolo_labels">
+        <item>विमान</item>          <item>साइकिल</item>         <item>पक्षी</item>           <item>नाव</item>            <item>बोतल</item>           <item>बस</item>             <item>कार</item>            <item>बिल्ली</item>          <item>कुर्सी</item>           <item>गाय</item>            <item>मेज</item>             <item>कुत्ता</item>           <item>घोड़ा</item>           <item>मोटरसाइकिल</item>      <item>व्यक्ति</item>          <item>गमला</item>           <item>भेड़</item>            <item>सोफा</item>           <item>ट्रेन</item>            <item>टीवी</item>
+    </string-array>
+</resources>

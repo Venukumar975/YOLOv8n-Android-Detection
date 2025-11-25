@@ -1,3 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LiveSense</string>
+    <string name="app_title">VisionX</string>
+    <string name="select_mode">Select Detection Mode</string>
+
+    <string name="btn_live">Live Camera</string>
+    <string name="btn_image">Pick Image</string>
+    <string name="btn_video">Pick Video</string>
+    <string name="btn_upload">Upload</string>
+    <string name="btn_snap">Snap</string>
+
+    <string name="perm_required">Camera permission required</string>
+    <string name="choose_lang">Choose Language</string>
+
+    <string-array name="yolo_labels">
+        <item>Aeroplane</item>      <item>Bicycle</item>        <item>Bird</item>           <item>Boat</item>           <item>Bottle</item>         <item>Bus</item>            <item>Car</item>            <item>Cat</item>            <item>Chair</item>          <item>Cow</item>            <item>Dining Table</item>   <item>Dog</item>            <item>Horse</item>          <item>Motorbike</item>      <item>Person</item>         <item>Potted Plant</item>   <item>Sheep</item>          <item>Sofa</item>           <item>Train</item>          <item>TV Monitor</item>
+    </string-array>
 </resources>

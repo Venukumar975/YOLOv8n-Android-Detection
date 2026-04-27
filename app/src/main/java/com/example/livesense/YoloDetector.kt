@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.RectF
-import android.util.Log
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
@@ -33,44 +32,41 @@ class YoloDetector(context: Context) {
         try {
             val modelFile = FileUtil.loadMappedFile(context, "yolov8n.tflite")
             val options = Interpreter.Options()
+            options.setNumThreads(4)
             interpreter = Interpreter(modelFile, options)
 
             val outShape = interpreter!!.getOutputTensor(0).shape()
             outputBuffer = TensorBuffer.createFixedSize(outShape, DataType.FLOAT32)
-            Log.i("YOLO_INIT", "Model loaded. Output shape: ${outShape.contentToString()}")
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    data class Detection(
-        val rect: RectF,
-        val score: Float,
-        val classIdx: Int
-    )
+    data class Detection(val rect: RectF, val score: Float, val classIdx: Int)
 
     fun detect(sourceBitmap: Bitmap): Pair<List<BoxOverlay.Box>, Float> {
         if (interpreter == null) return Pair(emptyList(), 0f)
 
-        // 1. LETTERBOXING: Scale image to fit 640x640 maintaining aspect ratio
-        val matrix = Matrix()
-        val scaleFactor = min(INPUT_SIZE.toFloat() / sourceBitmap.width, INPUT_SIZE.toFloat() / sourceBitmap.height)
-        matrix.postScale(scaleFactor, scaleFactor)
+        val srcW = sourceBitmap.width.toFloat()
+        val srcH = sourceBitmap.height.toFloat()
 
-        // Calculate padding to center the image
-        val scaledWidth = sourceBitmap.width * scaleFactor
-        val scaledHeight = sourceBitmap.height * scaleFactor
-        val padX = (INPUT_SIZE - scaledWidth) / 2f
-        val padY = (INPUT_SIZE - scaledHeight) / 2f
-
-        matrix.postTranslate(padX, padY)
+        // 1. LETTERBOX (Standard)
+        val scale = min(INPUT_SIZE / srcW, INPUT_SIZE / srcH)
+        val newW = srcW * scale
+        val newH = srcH * scale
+        val padX = (INPUT_SIZE - newW) / 2f
+        val padY = (INPUT_SIZE - newH) / 2f
 
         val inputBitmap = Bitmap.createBitmap(INPUT_SIZE, INPUT_SIZE, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(inputBitmap)
         canvas.drawColor(Color.BLACK)
-        canvas.drawBitmap(sourceBitmap, matrix, Paint())
 
-        // 2. PROCESS IMAGE
+        val matrix = Matrix()
+        matrix.postScale(scale, scale)
+        matrix.postTranslate(padX, padY)
+        canvas.drawBitmap(sourceBitmap, matrix, Paint(Paint.FILTER_BITMAP_FLAG))
+
+        // 2. INFERENCE
         val processor = ImageProcessor.Builder()
             .add(NormalizeOp(0f, 255f))
             .add(CastOp(DataType.FLOAT32))
@@ -79,27 +75,26 @@ class YoloDetector(context: Context) {
         inputImageBuffer.load(inputBitmap)
         val processedImage = processor.process(inputImageBuffer)
 
-        // 3. RUN INFERENCE
         interpreter!!.run(processedImage.buffer, outputBuffer!!.buffer.rewind())
 
         val outArr = outputBuffer!!.floatArray
         val outShape = interpreter!!.getOutputTensor(0).shape()
-
-        // 4. PROCESS OUTPUT
         val detections = processYoloOutput(outArr, outShape)
         val nmsDetections = nonMaxSuppression(detections, NMS_THRESHOLD)
 
-        // 5. REVERSE LETTERBOX: Map boxes back to Original Source Image space
+        // 3. REVERSE LETTERBOX
         val boxes = nmsDetections.map { det ->
-            // (x - padding) / scale
-            val left = (det.rect.left - padX) / scaleFactor
-            val top = (det.rect.top - padY) / scaleFactor
-            val right = (det.rect.right - padX) / scaleFactor
-            val bottom = (det.rect.bottom - padY) / scaleFactor
+            var left = (det.rect.left - padX) / scale
+            var top = (det.rect.top - padY) / scale
+            var right = (det.rect.right - padX) / scale
+            var bottom = (det.rect.bottom - padY) / scale
 
-            val scaledRect = RectF(left, top, right, bottom)
+            left = max(0f, left)
+            top = max(0f, top)
+            right = min(srcW, right)
+            bottom = min(srcH, bottom)
 
-            BoxOverlay.Box(scaledRect, Constants.LABELS.getOrElse(det.classIdx) { "Unknown" })
+            BoxOverlay.Box(RectF(left, top, right, bottom), Constants.LABELS.getOrElse(det.classIdx) { "Unknown" })
         }
 
         val bestScore = nmsDetections.maxOfOrNull { it.score } ?: 0f
@@ -109,113 +104,70 @@ class YoloDetector(context: Context) {
     private fun processYoloOutput(output: FloatArray, shape: IntArray): List<Detection> {
         val detections = mutableListOf<Detection>()
 
-        val numBoxes: Int
-        val numFeatures: Int
-        val isTransposed: Boolean
-
-        if (shape[1] > shape[2]) {
-            // [1, 8400, 84]
-            numBoxes = shape[1]
-            numFeatures = shape[2]
-            isTransposed = false
-        } else {
-            // [1, 84, 8400]
-            numBoxes = shape[2]
-            numFeatures = shape[1]
-            isTransposed = true
-        }
+        val isTransposed = shape[2] > shape[1]
+        val numBoxes = if (isTransposed) shape[2] else shape[1]
+        val numFeatures = if (isTransposed) shape[1] else shape[2]
         val numClasses = numFeatures - 4
 
         for (i in 0 until numBoxes) {
             var maxScore = 0f
             var classIdx = -1
 
-            if (isTransposed) {
-                for (c in 0 until numClasses) {
-                    val score = output[(c + 4) * numBoxes + i]
-                    if (score > maxScore) { maxScore = score; classIdx = c }
-                }
-            } else {
-                val base = i * numFeatures
-                for (c in 0 until numClasses) {
-                    val score = output[base + 4 + c]
-                    if (score > maxScore) { maxScore = score; classIdx = c }
-                }
+            for (c in 0 until numClasses) {
+                val score = if (isTransposed) output[(c + 4) * numBoxes + i] else output[i * numFeatures + 4 + c]
+                if (score > maxScore) { maxScore = score; classIdx = c }
             }
 
             if (maxScore > confidenceThreshold) {
-                var cx: Float
-                var cy: Float
-                var w: Float
-                var h: Float
+                var cx: Float; var cy: Float; var w: Float; var h: Float
 
                 if (isTransposed) {
-                    cx = output[0 * numBoxes + i]
-                    cy = output[1 * numBoxes + i]
-                    w = output[2 * numBoxes + i]
-                    h = output[3 * numBoxes + i]
+                    cx = output[0 * numBoxes + i]; cy = output[1 * numBoxes + i]
+                    w = output[2 * numBoxes + i]; h = output[3 * numBoxes + i]
                 } else {
                     val base = i * numFeatures
-                    cx = output[base + 0]
-                    cy = output[base + 1]
-                    w = output[base + 2]
-                    h = output[base + 3]
+                    cx = output[base]; cy = output[base+1]; w = output[base+2]; h = output[base+3]
                 }
 
-                // --- CRITICAL FIX: CHECK FOR NORMALIZED COORDINATES ---
-                // If coordinates are small (0.0 to 1.0), multiply by 640 to get pixels
-                if (w <= 1.0f && h <= 1.0f && cx <= 1.0f && cy <= 1.0f) {
-                    cx *= INPUT_SIZE
-                    cy *= INPUT_SIZE
-                    w *= INPUT_SIZE
-                    h *= INPUT_SIZE
+                if (w < 1.0f || h < 1.0f || cx < 1.0f) {
+                    cx *= INPUT_SIZE; cy *= INPUT_SIZE; w *= INPUT_SIZE; h *= INPUT_SIZE
                 }
 
-                val x1 = cx - w / 2f
-                val y1 = cy - h / 2f
-                val x2 = cx + w / 2f
-                val y2 = cy + h / 2f
+                val left = cx - w / 2f
+                val top = cy - h / 2f
+                val right = cx + w / 2f
+                val bottom = cy + h / 2f
 
-                val rect = RectF(x1, y1, x2, y2)
-                detections.add(Detection(rect, maxScore, classIdx))
+                detections.add(Detection(RectF(left, top, right, bottom), maxScore, classIdx))
             }
         }
         return detections
     }
 
     private fun nonMaxSuppression(detections: List<Detection>, iouThreshold: Float): List<Detection> {
-        val sortedDetections = detections.sortedByDescending { it.score }
-        val selectedDetections = mutableListOf<Detection>()
-
-        for (det in sortedDetections) {
-            var shouldAdd = true
-            for (selected in selectedDetections) {
-                if (iou(det.rect, selected.rect) > iouThreshold) {
-                    shouldAdd = false
-                    break
-                }
+        val sorted = detections.sortedByDescending { it.score }
+        val selected = mutableListOf<Detection>()
+        for (det in sorted) {
+            var overlapped = false
+            for (sel in selected) {
+                if (iou(det.rect, sel.rect) > iouThreshold) { overlapped = true; break }
             }
-            if (shouldAdd) {
-                selectedDetections.add(det)
-            }
+            if (!overlapped) selected.add(det)
         }
-        return selectedDetections
+        return selected
     }
 
     private fun iou(a: RectF, b: RectF): Float {
+        val areaA = (a.right - a.left) * (a.bottom - a.top)
+        val areaB = (b.right - b.left) * (b.bottom - b.top)
+        if (areaA <= 0 || areaB <= 0) return 0f
+
         val intersectionLeft = max(a.left, b.left)
         val intersectionTop = max(a.top, b.top)
         val intersectionRight = min(a.right, b.right)
         val intersectionBottom = min(a.bottom, b.bottom)
 
-        val intersectionWidth = max(0f, intersectionRight - intersectionLeft)
-        val intersectionHeight = max(0f, intersectionBottom - intersectionTop)
-        val intersectionArea = intersectionWidth * intersectionHeight
-
-        val areaA = (a.right - a.left) * (a.bottom - a.top)
-        val areaB = (b.right - b.left) * (b.bottom - a.top)
-        val unionArea = areaA + areaB - intersectionArea
-
-        return if (unionArea > 0) intersectionArea / unionArea else 0f
+        val intersectionArea = max(0f, intersectionRight - intersectionLeft) * max(0f, intersectionBottom - intersectionTop)
+        return intersectionArea / (areaA + areaB - intersectionArea)
     }
 }

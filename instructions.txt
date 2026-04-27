@@ -1,0 +1,38 @@
+# How to Clone and Work on LiveSense
+
+Follow these steps to get the project up and running on your local machine.
+
+## 📋 Requirements
+- **Android Studio:** Hedgehog (2023.1.1) or newer.
+- **JDK:** Version 11 or higher (bundled with Android Studio).
+- **Physical Device:** Highly recommended for testing the camera features (CameraX works best on real hardware).
+- **Minimum Android SDK:** API Level 24 (Android 7.0).
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+Open your terminal or command prompt and run:
+```bash
+git clone https://github.com/YOUR_USERNAME/LiveSense.git
+```
+
+### 2. Open in Android Studio
+- Open Android Studio and select **"Open"**.
+- Navigate to the `LiveSense` folder and click **OK**.
+- Wait for Gradle to sync. This might take a few minutes as it downloads the TFLite dependencies.
+
+### 3. Model Setup
+- Ensure the `yolov8n.tflite` model file is located in the `app/src/main/assets` directory.
+- If it's missing, place your trained YOLOv8 Nano model (TFLite format) there and rename it to `yolov8n.tflite`.
+
+### 4. Running the App
+- Connect your Android device via USB.
+- Enable **USB Debugging** in Developer Options.
+- Select your device in the Android Studio toolbar and click the **Run (Play)** button.
+
+## 🛠 Working on the Project
+- **Adding new labels:** Update the list in `Constants.kt`.
+- **Modifying Detection Logic:** Look into `YoloDetector.kt`.
+- **UI Changes:** Most UI elements are in `res/layout` using ViewBinding.
+
+Enjoy exploring the world of LiveSense!

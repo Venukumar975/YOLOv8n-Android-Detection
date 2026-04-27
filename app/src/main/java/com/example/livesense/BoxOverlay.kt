@@ -10,6 +10,13 @@ import android.view.View
 import kotlin.math.min
 import kotlin.math.max
 
+/**
+ * A custom View responsible for drawing object detection bounding boxes and labels
+ * over a camera preview or image.
+ *
+ * It handles scaling and translation logic to ensure boxes align correctly with the
+ * displayed content, supporting both "Fill" (for camera) and "Fit" (for images) modes.
+ */
 class BoxOverlay(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var boxes = listOf<Box>()
@@ -48,7 +55,15 @@ class BoxOverlay(context: Context, attrs: AttributeSet) : View(context, attrs) {
         textSize = 50f
     }
 
-    // UPDATED: Added 'fitCenter' parameter with a default of false
+    /**
+     * Updates the boxes to be drawn on the overlay.
+     *
+     * @param newBoxes List of detection results containing coordinates and labels.
+     * @param bitmapWidth The width of the original source (camera frame or image).
+     * @param bitmapHeight The height of the original source.
+     * @param fitCenter If true, the boxes will be scaled to fit within the view (letterboxing).
+     *                  If false, they will be scaled to fill the view (cropping).
+     */
     fun setBoxes(newBoxes: List<Box>, bitmapWidth: Int, bitmapHeight: Int, fitCenter: Boolean = false) {
         boxes = newBoxes
         sourceWidth = bitmapWidth.toFloat()
@@ -118,5 +133,8 @@ class BoxOverlay(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+    /**
+     * Represents a single bounding box with a coordinate rectangle and a class label.
+     */
     data class Box(val rect: RectF, val label: String)
 }

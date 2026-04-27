@@ -1,6 +1,8 @@
 # Android Studio / IntelliJ
 *.iml
-.gradle
+.gradle/
+.idea/
+local.properties
 /local.properties
 /.idea/caches
 /.idea/libraries
@@ -14,14 +16,14 @@
 captures/
 .externalNativeBuild
 .cxx
-
+build/
 # Build outputs
 **/build/
 *.apk
 *.aar
 *.ap_
 *.aab
-
+*.iml
 # OS specific files
 .DS_Store
 Thumbs.db
